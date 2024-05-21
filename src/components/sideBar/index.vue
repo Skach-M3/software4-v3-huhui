@@ -15,7 +15,7 @@
               >多病种疾病危险因素关联关系挖掘工具软件</span
             ></span
           >
-          <el-dropdown style="float: right">
+          <div style="float: right">
             <span class="el-dropdown-link" style="color: white;">
               欢迎您{{ LoginUserName }}
               <!-- <i class="el-icon-arrow-down el-icon--right"></i> -->
@@ -25,7 +25,7 @@
                 <el-dropdown-item @click.native="updatePass">修改密码</el-dropdown-item>
                 <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu> -->
-          </el-dropdown>
+          </div>
         </el-menu>
       </el-header>
       <el-container>
