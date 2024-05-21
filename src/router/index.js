@@ -179,7 +179,7 @@ router.beforeEach(async (to, from, next) => {
   try {
     //无权限页面不需要判断用户信息就放行
     if(to.path == '/unauthorized'){
-      next();
+      return next();
     }
 
     // 检查 session 里的用户信息
@@ -212,39 +212,25 @@ router.beforeEach(async (to, from, next) => {
         return next({ path: '/unauthorized' });
       }
     } else {
-      // 如果有用户信息，检查白名单
-      if (whiteList.indexOf(to.path) !== -1) {
-        // 如果在白名单中，则直接放行
-        return next();
+      // 如果有用户信息
+      //修正侧边栏高亮
+      if (to.path === "/TaskResult") {
+        store.commit("SetSideBarPath", "/taskManage");
       } else {
-        const userRoles = sessionStorage.getItem('userrole'); // 从 sessionStorage 获取用户角色信息
-        let record = to.matched[to.matched.length - 1]; // 获取当前匹配路由的最右侧路由
-        let isAuthorized = false; // 初始化权限标志为 false
+        store.commit("SetSideBarPath", to.path);
+      }
+      const userRoles = sessionStorage.getItem('userrole'); // 从 sessionStorage 获取用户角色信息
+      let record = to.matched[to.matched.length - 1]; // 获取当前匹配路由的最右侧路由
 
-        if (record.meta.roles) {
-          // 检查用户角色是否在路由允许的角色列表中
-          if (record.meta.roles.includes(userRoles)) {
-            isAuthorized = true; // 如果找到匹配的角色，设置权限标志为 true
-          }
+      if (record.meta.roles) {
+        // 检查用户角色是否在路由允许的角色列表中
+        if (record.meta.roles.includes(userRoles)) {
+          return next(); // 如果找到匹配的角色，设置权限标志为 true
+        }else{
+          return next('/unauthorized'); // 用户无权限，重定向到未授权页面
         }
-
-        if (isAuthorized) {
-          if (to.path === "/TaskResult") {
-            store.commit("SetSideBarPath", "/taskManage");
-          } else {
-            store.commit("SetSideBarPath", to.path);
-          }
-          return next(); // 用户有权限，允许访问
-        } else if (to.matched.some(record => record.meta.roles)) {
-          return next({ path: '/unauthorized' }); // 用户无权限，重定向到未授权页面
-        } else {
-          if (to.path === "/TaskResult") {
-            store.commit("SetSideBarPath", "/taskManage");
-          } else {
-            store.commit("SetSideBarPath", to.path);
-          }
-          return next(); // 如果没有定义 roles 元数据，允许所有用户访问
-        }
+      }else{
+        return next(); // 如果没有定义 roles 元数据，允许所有用户访问
       }
     }
   } catch (error) {

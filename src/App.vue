@@ -31,7 +31,7 @@ export default {
        //this.getDataList();
       //因为用户登录后只展示登录用户所创建的任务，所以getTaskList在登录后跳转组件时调用
       //this.getTaskList();
-      // this.getModelList();
+      this.getModelList();
     }
   }
 }
