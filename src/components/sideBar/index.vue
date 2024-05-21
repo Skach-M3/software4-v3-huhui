@@ -15,17 +15,17 @@
               >多病种疾病危险因素关联关系挖掘工具软件</span
             ></span
           >
-          <!--            <template slot="title">当前服务器：</template>-->
           <el-dropdown style="float: right">
-          <span class="el-dropdown-link" style="color: white;">
-            欢迎您{{ LoginUserName }}<i class="el-icon-arrow-down el-icon--right"></i>
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item @click.native="toUserCenter">个人信息</el-dropdown-item>
-              <el-dropdown-item @click.native="updatePass">修改密码</el-dropdown-item>
-              <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+            <span class="el-dropdown-link" style="color: white;">
+              欢迎您{{ LoginUserName }}
+              <!-- <i class="el-icon-arrow-down el-icon--right"></i> -->
+            </span>
+            <!-- <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item @click.native="toUserCenter">个人信息</el-dropdown-item>
+                <el-dropdown-item @click.native="updatePass">修改密码</el-dropdown-item>
+                <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu> -->
+          </el-dropdown>
         </el-menu>
       </el-header>
       <el-container>

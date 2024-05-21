@@ -19,14 +19,14 @@
     },
     data(){
       return {
-        url: '', //设置文档网络地址，可以是相对地址
+        url: "/static/software4opt.docx", //设置文档网络地址，可以是相对地址
       }
     },
-    created(){
-      getRequest("/file/getOptFile").then((res) => {
-        this.url = res
-      });
-    }
+    // created(){
+    //   getRequest("/file/getOptFile").then((res) => {
+    //     this.url = res
+    //   });
+    // }
   }
   </script>
 

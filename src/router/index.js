@@ -24,13 +24,15 @@ import SoftwareIntro from "@/components/tab/SoftwareIntro.vue";
 import Operation from "@/components/tab/Operation.vue";
 import updatePassword from "@/components/tab/updatePassword.vue";
 import userCenter from "@/components/tab/userCenter.vue";
+import { getRequest } from '@/api/user'
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: "/",
-    name: "LogIn",
-    component: LogIn,
+    // name: "LogIn",
+    // component: LogIn,
+    redirect: "/sideBar",
   },
   {
     path: "/register",
@@ -171,62 +173,87 @@ const router = new VueRouter({
   routes
 })
 
-const whiteList = ['/logIn', '/register', '/unauthorized','/forget']
+const whiteList = ['/logIn', '/register', '/unauthorized', '/forget'];
 
-router.beforeEach(function(to, from, next) {
-  //to将要访问的路径
-  //from代表从哪个路径跳转而来
-  //next是一个函数，表示放行
-  //next() 放行 next('/login')强制跳转
-
-  // 刘璇的路由设置
-  if (whiteList.indexOf(to.path) !== -1) {
-    // 如果在白名单中，则直接放行
-    next()
-  } else {
-    const userRoles = sessionStorage.getItem('userrole'); // 从sessionStorage获取用户角色信息
-    let record = to.matched[to.matched.length - 1]// 获取当前匹配路由的最右侧路由
-    let isAuthorized = false; // 初始化权限标志为false
-
-    if (record.meta.roles) {
-      // 检查用户角色是否在路由允许的角色列表中
-      if (record.meta.roles.includes(userRoles)) {
-        isAuthorized = true; // 如果找到匹配的角色，设置权限标志为true
-      }
+router.beforeEach(async (to, from, next) => {
+  try {
+    //无权限页面不需要判断用户信息就放行
+    if(to.path == '/unauthorized'){
+      next();
     }
-    if (isAuthorized) {
-      if(to.path === "/TaskResult"){
-        store.commit("SetSideBarPath","/taskManage");
-      }else{
-        store.commit("SetSideBarPath",to.path);
+
+    // 检查 session 里的用户信息
+    const username = sessionStorage.getItem('username');
+    // 如果没有用户信息
+    if (!username) {
+      // 检查 URL 参数
+      const repKey = to.query?.repKey;
+      console.log("repKey:", repKey);
+      if (repKey) {
+        // 绵阳单点登录
+        const resp = await getRequest(`/login?repKey=${repKey}`);
+        if (resp) {
+          console.log("后台回复的code", resp.code);
+          console.log("后台回复的UserName", resp.data.username);
+          console.log("后台回复的UserCode", resp.data.uid);
+          if (resp.code == "200") {
+            sessionStorage.setItem("username", resp.data.username);
+            sessionStorage.setItem("userid", resp.data.uid);
+            sessionStorage.setItem("userrole", resp.data.role);
+            return next('/SoftwareIntro'); // 跳转到 SoftwareIntro 页面
+          } else {
+            return next('/unauthorized');
+          }
+        } else {
+          return next('/unauthorized');
+        }
+      } else {
+        // 跳转到未授权页面
+        return next({ path: '/unauthorized' });
       }
-      next(); // 用户有权限，允许访问
-    } else if (to.matched.some(record => record.meta.roles)) {
-   
-      next({ path: '/unauthorized' }); // 用户无权限，重定向到未授权页面
     } else {
-      if(to.path === "/TaskResult"){
-        store.commit("SetSideBarPath","/taskManage");
-      }else{
-        store.commit("SetSideBarPath",to.path);
-      }
-      next(); // 如果没有定义roles元数据，允许所有用户访问
-    }
-  }
+      // 如果有用户信息，检查白名单
+      if (whiteList.indexOf(to.path) !== -1) {
+        // 如果在白名单中，则直接放行
+        return next();
+      } else {
+        const userRoles = sessionStorage.getItem('userrole'); // 从 sessionStorage 获取用户角色信息
+        let record = to.matched[to.matched.length - 1]; // 获取当前匹配路由的最右侧路由
+        let isAuthorized = false; // 初始化权限标志为 false
 
-// 自己的路由设置
-  // if (to.path === '/') return next();
-  // if(to.path==='/register') return next();
-  // //获取token
-  // const uid = window.sessionStorage.getItem('userid');
-  // if (!uid) return next('/');
-  // // 查看任务结果页面需要高亮历史任务侧栏
-  // console.log(to.path);
-  // if(to.path === "/TaskResult"){
-  //   store.commit("SetSideBarPath","/taskManage");
-  // }else{
-  //   store.commit("SetSideBarPath",to.path);
-  // }
-  // next();
+        if (record.meta.roles) {
+          // 检查用户角色是否在路由允许的角色列表中
+          if (record.meta.roles.includes(userRoles)) {
+            isAuthorized = true; // 如果找到匹配的角色，设置权限标志为 true
+          }
+        }
+
+        if (isAuthorized) {
+          if (to.path === "/TaskResult") {
+            store.commit("SetSideBarPath", "/taskManage");
+          } else {
+            store.commit("SetSideBarPath", to.path);
+          }
+          return next(); // 用户有权限，允许访问
+        } else if (to.matched.some(record => record.meta.roles)) {
+          return next({ path: '/unauthorized' }); // 用户无权限，重定向到未授权页面
+        } else {
+          if (to.path === "/TaskResult") {
+            store.commit("SetSideBarPath", "/taskManage");
+          } else {
+            store.commit("SetSideBarPath", to.path);
+          }
+          return next(); // 如果没有定义 roles 元数据，允许所有用户访问
+        }
+      }
+    }
+  } catch (error) {
+    // 如果代码有问题，可以在这里捕获并处理错误
+    console.error('导航守卫出错:', error);
+    // 跳转到未授权页面
+    return next({ path: '/unauthorized' });
+  }
 });
+
+
 export default router

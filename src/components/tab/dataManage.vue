@@ -2152,6 +2152,7 @@ export default {
         },
       }
     },
+    // 获取审批状态
     getCheckApprove() {
       getRequest(`/api/getCheckApprove`, {
         id: this.nodeid,

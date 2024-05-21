@@ -1,6 +1,6 @@
 <template>
   <div>
-      <vue-office-pdf :src="url"/>
+      <vue-office-pdf style="height: 100vh;" :src="url"/>
   </div>
     </template>
      
@@ -17,13 +17,13 @@
       },
       data(){
         return {
-          url: '' //设置文档网络地址，可以是相对地址
+          url: '/static/software4intro.pdf', //设置文档网络地址，可以是相对地址
         }
       },
       created(){
-        getRequest("/file/getIntroFile").then((res) => {
-          this.url = res
-        });
+        // getRequest("/file/getIntroFile").then((res) => {
+        //   this.url = res
+        // });
       }
     }
     </script>
